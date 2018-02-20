@@ -2,7 +2,7 @@
 //  ESTabBarContentView.swift
 //
 //  Created by Vincent Li on 2017/2/8.
-//  Copyright (c) 2013-2018 ESTabBarController (https://github.com/eggswift/ESTabBarController)
+//  Copyright (c) 2013-2017 ESTabBarController (https://github.com/eggswift/ESTabBarController)
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -41,13 +41,6 @@ open class ESTabBarItemContentView: UIView {
     /// 是否支持高亮
     open var highlightEnabled = true
 
-    open var textFont = UIFont() {
-        didSet {
-            self.titleLabel.font = textFont
-            self.updateLayout()
-        }
-    }
-    
     /// 文字颜色
     open var textColor = UIColor(white: 0.57254902, alpha: 1.0) {
         didSet {
@@ -90,6 +83,13 @@ open class ESTabBarItemContentView: UIView {
         }
     }
     
+    open var textFont = UIFont.systemFont(ofSize: 9) {
+        didSet {
+            self.titleLabel.font = textFont
+            self.updateLayout()
+        }
+    }
+    
     open var title: String? {
         didSet {
             self.titleLabel.text = title
@@ -121,6 +121,7 @@ open class ESTabBarItemContentView: UIView {
     open var imageView: UIImageView = {
         let imageView = UIImageView.init(frame: CGRect.zero)
         imageView.backgroundColor = .clear
+        imageView.contentMode = .scaleAspectFit
         return imageView
     }()
     
@@ -224,14 +225,10 @@ open class ESTabBarItemContentView: UIView {
             //f = 10.0
         }
         
-        let fnt : UIFont = textFont;
-        
-        /*if fnt != nil {
-            fnt = UIFont.systemFont(ofSize: f);
-        }*/
+        let padd: CGFloat = 5.0
         
         if !imageView.isHidden && !titleLabel.isHidden {
-            titleLabel.font = fnt
+            titleLabel.font = textFont //UIFont.init(name: "Nunito-SemiBold", size: 9.0) //UIFont.systemFont(ofSize: f)
             titleLabel.sizeToFit()
             if #available(iOS 11.0, *), isWide {
                 titleLabel.frame = CGRect.init(x: (w - titleLabel.bounds.size.width) / 2.0 + (UIScreen.main.scale == 3.0 ? 14.25 : 12.25),
@@ -253,12 +250,12 @@ open class ESTabBarItemContentView: UIView {
                                               height: s)
             }
         } else if !imageView.isHidden {
-            imageView.frame = CGRect.init(x: (w - s) / 2.0,
-                                          y: (h - s) / 2.0,
-                                          width: s,
-                                          height: s)
+            imageView.frame = CGRect.init(x: padd,
+                                          y: padd,
+                                          width: self.bounds.size.width - padd * 2,
+                                          height: self.bounds.size.height - padd * 2)
         } else if !titleLabel.isHidden {
-            titleLabel.font = fnt
+            titleLabel.font = textFont //UIFont.systemFont(ofSize: f)
             titleLabel.sizeToFit()
             titleLabel.frame = CGRect.init(x: (w - titleLabel.bounds.size.width) / 2.0,
                                            y: (h - titleLabel.bounds.size.height) / 2.0,
@@ -365,3 +362,4 @@ open class ESTabBarItemContentView: UIView {
     }
     
 }
+
