@@ -41,6 +41,13 @@ open class ESTabBarItemContentView: UIView {
     /// 是否支持高亮
     open var highlightEnabled = true
 
+    open var textFont = UIFont() {
+        didSet {
+            self.titleLabel.font = textFont
+            self.updateLayout()
+        }
+    }
+    
     /// 文字颜色
     open var textColor = UIColor(white: 0.57254902, alpha: 1.0) {
         didSet {
@@ -204,21 +211,27 @@ open class ESTabBarItemContentView: UIView {
         let isWide = isLandscape || traitCollection.horizontalSizeClass == .regular // is landscape or regular
         
         var s: CGFloat = 0.0 // image size
-        var f: CGFloat = 0.0 // font
+        //var f: CGFloat = 0.0 // font
         
         imageView.isHidden = (imageView.image == nil)
         titleLabel.isHidden = (titleLabel.text == nil)
         
         if #available(iOS 11.0, *), isWide {
             s = UIScreen.main.scale == 3.0 ? 23.0 : 20.0
-            f = UIScreen.main.scale == 3.0 ? 13.0 : 12.0
+            //f = UIScreen.main.scale == 3.0 ? 13.0 : 12.0
         } else {
             s = 23.0
-            f = 10.0
+            //f = 10.0
         }
         
+        let fnt : UIFont = textFont;
+        
+        /*if fnt != nil {
+            fnt = UIFont.systemFont(ofSize: f);
+        }*/
+        
         if !imageView.isHidden && !titleLabel.isHidden {
-            titleLabel.font = UIFont.systemFont(ofSize: f)
+            titleLabel.font = fnt
             titleLabel.sizeToFit()
             if #available(iOS 11.0, *), isWide {
                 titleLabel.frame = CGRect.init(x: (w - titleLabel.bounds.size.width) / 2.0 + (UIScreen.main.scale == 3.0 ? 14.25 : 12.25),
@@ -245,7 +258,7 @@ open class ESTabBarItemContentView: UIView {
                                           width: s,
                                           height: s)
         } else if !titleLabel.isHidden {
-            titleLabel.font = UIFont.systemFont(ofSize: f)
+            titleLabel.font = fnt
             titleLabel.sizeToFit()
             titleLabel.frame = CGRect.init(x: (w - titleLabel.bounds.size.width) / 2.0,
                                            y: (h - titleLabel.bounds.size.height) / 2.0,
