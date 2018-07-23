@@ -25,7 +25,7 @@
 
 import UIKit
 
-open class ESTabBarItemMoreContentView: ESTabBarItemContentView {
+@objcMembers open class ESTabBarItemMoreContentView: ESTabBarItemContentView {
     
     public override init(frame: CGRect) {
         super.init(frame: frame)

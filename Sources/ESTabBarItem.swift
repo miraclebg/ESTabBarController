@@ -43,7 +43,7 @@ import UIKit
  *      9. func badgeTextAttributes(for state: UIControlState) -> [String : Any]?
  */
 @available(iOS 8.0, *)
-open class ESTabBarItem: UITabBarItem {
+@objcMembers open class ESTabBarItem: UITabBarItem {
     
     /// Customize content view
     open var contentView: ESTabBarItemContentView?

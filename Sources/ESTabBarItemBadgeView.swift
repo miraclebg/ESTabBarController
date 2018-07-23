@@ -30,7 +30,7 @@ import UIKit
  * 这个类定义了item中使用的badge视图样式，默认为ESTabBarItemBadgeView类对象。
  * 你可以设置ESTabBarItemContentView的badgeView属性为自定义的ESTabBarItemBadgeView子类，这样就可以轻松实现 自定义通知样式了。
  */
-open class ESTabBarItemBadgeView: UIView {
+@objcMembers open class ESTabBarItemBadgeView: UIView {
     
     /// 默认颜色
     open static var defaultBadgeColor = UIColor(red: 255.0/255.0, green: 59.0/255.0, blue: 48.0/255.0, alpha: 1.0)

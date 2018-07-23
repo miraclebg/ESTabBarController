@@ -79,7 +79,7 @@ internal protocol ESTabBarDelegate: NSObjectProtocol {
 
 
 /// ESTabBar是高度自定义的UITabBar子类，通过添加UIControl的方式实现自定义tabBarItem的效果。目前支持tabBar的大部分属性的设置，例如delegate,items,selectedImge,itemPositioning,itemWidth,itemSpacing等，以后会更加细致的优化tabBar原有属性的设置效果。
-open class ESTabBar: UITabBar {
+@objcMembers open class ESTabBar: UITabBar {
 
     internal weak var customDelegate: ESTabBarDelegate?
     

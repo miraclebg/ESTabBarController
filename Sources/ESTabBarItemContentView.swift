@@ -25,7 +25,7 @@
 
 import UIKit
 
-open class ESTabBarItemContentView: UIView {
+@objcMembers open class ESTabBarItemContentView: UIView {
     
     // MARK: - PROPERTY SETTING
 
