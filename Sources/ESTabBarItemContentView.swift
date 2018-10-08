@@ -2,7 +2,7 @@
 //  ESTabBarContentView.swift
 //
 //  Created by Vincent Li on 2017/2/8.
-//  Copyright (c) 2013-2018 ESTabBarController (https://github.com/eggswift/ESTabBarController)
+//  Copyright (c) 2013-2017 ESTabBarController (https://github.com/eggswift/ESTabBarController)
 //
 //  Permission is hereby granted, free of charge, to any person obtaining a copy
 //  of this software and associated documentation files (the "Software"), to deal
@@ -25,18 +25,10 @@
 
 import UIKit
 
-public enum ESTabBarItemContentMode : Int {
-    
-    case alwaysOriginal // Always set the original image size
-    
-    case alwaysTemplate // Always set the image as a template image size
-}
-
-
-open class ESTabBarItemContentView: UIView {
+@objcMembers open class ESTabBarItemContentView: UIView {
     
     // MARK: - PROPERTY SETTING
-
+    
     /// 设置contentView的偏移
     open var insets = UIEdgeInsets.zero
     
@@ -91,6 +83,13 @@ open class ESTabBarItemContentView: UIView {
         }
     }
     
+    open var textFont = UIFont.systemFont(ofSize: 9) {
+        didSet {
+            self.titleLabel.font = textFont
+            self.updateLayout()
+        }
+    }
+    
     open var title: String? {
         didSet {
             self.titleLabel.text = title
@@ -105,12 +104,6 @@ open class ESTabBarItemContentView: UIView {
         }
     }
     
-    /// Item content mode, default is .alwaysTemplate like UITabBarItem
-    open var itemContentMode: ESTabBarItemContentMode = .alwaysTemplate {
-        didSet {
-            self.updateDisplay()
-        }
-    }
     
     /// Icon imageView's image
     open var image: UIImage? {
@@ -128,6 +121,7 @@ open class ESTabBarItemContentView: UIView {
     open var imageView: UIImageView = {
         let imageView = UIImageView.init(frame: CGRect.zero)
         imageView.backgroundColor = .clear
+        imageView.contentMode = .scaleAspectFit
         return imageView
     }()
     
@@ -140,7 +134,7 @@ open class ESTabBarItemContentView: UIView {
     }()
     
     
-    /// Badge value
+    /// 小红点相关属性
     open var badgeValue: String? {
         didSet {
             if let _ = badgeValue {
@@ -199,7 +193,7 @@ open class ESTabBarItemContentView: UIView {
     public required init?(coder aDecoder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-
+    
     open func updateDisplay() {
         imageView.image = (selected ? (selectedImage ?? image) : image)?.withRenderingMode(renderingMode)
         imageView.tintColor = selected ? highlightIconColor : iconColor
@@ -211,99 +205,75 @@ open class ESTabBarItemContentView: UIView {
         let w = self.bounds.size.width
         let h = self.bounds.size.height
         
+        var isLandscape = false
+        if let keyWindow = UIApplication.shared.keyWindow {
+            isLandscape = keyWindow.bounds.width > keyWindow.bounds.height
+        }
+        let isWide = isLandscape || traitCollection.horizontalSizeClass == .regular // is landscape or regular
+        
+        var s: CGFloat = 0.0 // image size
+        //var f: CGFloat = 0.0 // font
+        
         imageView.isHidden = (imageView.image == nil)
         titleLabel.isHidden = (titleLabel.text == nil)
-
-        if self.itemContentMode == .alwaysTemplate {
-            var s: CGFloat = 0.0 // image size
-            var f: CGFloat = 0.0 // font
-            var isLandscape = false
-            if let keyWindow = UIApplication.shared.keyWindow {
-                isLandscape = keyWindow.bounds.width > keyWindow.bounds.height
-            }
-            let isWide = isLandscape || traitCollection.horizontalSizeClass == .regular // is landscape or regular
+        
+        if #available(iOS 11.0, *), isWide {
+            s = UIScreen.main.scale == 3.0 ? 23.0 : 20.0
+            //f = UIScreen.main.scale == 3.0 ? 13.0 : 12.0
+        } else {
+            s = 23.0
+            //f = 10.0
+        }
+        
+        let padd: CGFloat = 5.0
+        
+        if !imageView.isHidden && !titleLabel.isHidden {
+            titleLabel.font = textFont //UIFont.init(name: "Nunito-SemiBold", size: 9.0) //UIFont.systemFont(ofSize: f)
+            titleLabel.sizeToFit()
             if #available(iOS 11.0, *), isWide {
-                s = UIScreen.main.scale == 3.0 ? 23.0 : 20.0
-                f = UIScreen.main.scale == 3.0 ? 13.0 : 12.0
-            } else {
-                s = 23.0
-                f = 10.0
-            }
-            
-            if !imageView.isHidden && !titleLabel.isHidden {
-                titleLabel.font = UIFont.systemFont(ofSize: f)
-                titleLabel.sizeToFit()
-                if #available(iOS 11.0, *), isWide {
-                    titleLabel.frame = CGRect.init(x: (w - titleLabel.bounds.size.width) / 2.0 + (UIScreen.main.scale == 3.0 ? 14.25 : 12.25),
-                                                   y: (h - titleLabel.bounds.size.height) / 2.0,
-                                                   width: titleLabel.bounds.size.width,
-                                                   height: titleLabel.bounds.size.height)
-                    imageView.frame = CGRect.init(x: titleLabel.frame.origin.x - s - (UIScreen.main.scale == 3.0 ? 6.0 : 5.0),
-                                                  y: (h - s) / 2.0,
-                                                  width: s,
-                                                  height: s)
-                } else {
-                    titleLabel.frame = CGRect.init(x: (w - titleLabel.bounds.size.width) / 2.0,
-                                                   y: h - titleLabel.bounds.size.height - 1.0,
-                                                   width: titleLabel.bounds.size.width,
-                                                   height: titleLabel.bounds.size.height)
-                    imageView.frame = CGRect.init(x: (w - s) / 2.0,
-                                                  y: (h - s) / 2.0 - 6.0,
-                                                  width: s,
-                                                  height: s)
-                }
-            } else if !imageView.isHidden {
-                imageView.frame = CGRect.init(x: (w - s) / 2.0,
-                                              y: (h - s) / 2.0,
-                                              width: s,
-                                              height: s)
-            } else if !titleLabel.isHidden {
-                titleLabel.font = UIFont.systemFont(ofSize: f)
-                titleLabel.sizeToFit()
-                titleLabel.frame = CGRect.init(x: (w - titleLabel.bounds.size.width) / 2.0,
+                titleLabel.frame = CGRect.init(x: (w - titleLabel.bounds.size.width) / 2.0 + (UIScreen.main.scale == 3.0 ? 14.25 : 12.25),
                                                y: (h - titleLabel.bounds.size.height) / 2.0,
                                                width: titleLabel.bounds.size.width,
                                                height: titleLabel.bounds.size.height)
-            }
-            
-            if let _ = badgeView.superview {
-                let size = badgeView.sizeThatFits(self.frame.size)
-                if #available(iOS 11.0, *), isWide {
-                    badgeView.frame = CGRect.init(origin: CGPoint.init(x: imageView.frame.midX - 3 + badgeOffset.horizontal, y: imageView.frame.midY + 3 + badgeOffset.vertical), size: size)
-                } else {
-                    badgeView.frame = CGRect.init(origin: CGPoint.init(x: w / 2.0 + badgeOffset.horizontal, y: h / 2.0 + badgeOffset.vertical), size: size)
-                }
-                badgeView.setNeedsLayout()
-            }
-            
-        } else {
-            if !imageView.isHidden && !titleLabel.isHidden {
-                titleLabel.sizeToFit()
-                imageView.sizeToFit()
+                imageView.frame = CGRect.init(x: titleLabel.frame.origin.x - s - (UIScreen.main.scale == 3.0 ? 6.0 : 5.0),
+                                              y: (h - s) / 2.0,
+                                              width: s,
+                                              height: s)
+            } else {
                 titleLabel.frame = CGRect.init(x: (w - titleLabel.bounds.size.width) / 2.0,
                                                y: h - titleLabel.bounds.size.height - 1.0,
                                                width: titleLabel.bounds.size.width,
                                                height: titleLabel.bounds.size.height)
-                imageView.frame = CGRect.init(x: (w - imageView.bounds.size.width) / 2.0,
-                                              y: (h - imageView.bounds.size.height) / 2.0 - 6.0,
-                                              width: imageView.bounds.size.width,
-                                              height: imageView.bounds.size.height)
-            } else if !imageView.isHidden {
-                imageView.sizeToFit()
-                imageView.center = CGPoint.init(x: w / 2.0, y: h / 2.0)
-            } else if !titleLabel.isHidden {
-                titleLabel.sizeToFit()
-                titleLabel.center = CGPoint.init(x: w / 2.0, y: h / 2.0)
+                imageView.frame = CGRect.init(x: (w - s) / 2.0,
+                                              y: (h - s) / 2.0 - 6.0,
+                                              width: s,
+                                              height: s)
             }
-            
-            if let _ = badgeView.superview {
-                let size = badgeView.sizeThatFits(self.frame.size)
+        } else if !imageView.isHidden {
+            imageView.frame = CGRect.init(x: padd,
+                                          y: padd,
+                                          width: self.bounds.size.width - padd * 2,
+                                          height: self.bounds.size.height - padd * 2)
+        } else if !titleLabel.isHidden {
+            titleLabel.font = textFont //UIFont.systemFont(ofSize: f)
+            titleLabel.sizeToFit()
+            titleLabel.frame = CGRect.init(x: (w - titleLabel.bounds.size.width) / 2.0,
+                                           y: (h - titleLabel.bounds.size.height) / 2.0,
+                                           width: titleLabel.bounds.size.width,
+                                           height: titleLabel.bounds.size.height)
+        }
+        
+        if let _ = badgeView.superview {
+            let size = badgeView.sizeThatFits(self.frame.size)
+            if #available(iOS 11.0, *), isWide {
+                badgeView.frame = CGRect.init(origin: CGPoint.init(x: imageView.frame.midX - 3 + badgeOffset.horizontal, y: imageView.frame.midY + 3 + badgeOffset.vertical), size: size)
+            } else {
                 badgeView.frame = CGRect.init(origin: CGPoint.init(x: w / 2.0 + badgeOffset.horizontal, y: h / 2.0 + badgeOffset.vertical), size: size)
-                badgeView.setNeedsLayout()
             }
+            badgeView.setNeedsLayout()
         }
     }
-
+    
     // MARK: - INTERNAL METHODS
     internal final func select(animated: Bool, completion: (() -> ())?) {
         selected = true
@@ -392,3 +362,4 @@ open class ESTabBarItemContentView: UIView {
     }
     
 }
+
